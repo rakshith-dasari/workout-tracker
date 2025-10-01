@@ -53,7 +53,12 @@ export function TrendChart({ exerciseName }: { exerciseName: string }) {
   }, [exerciseName]);
 
   if (loading) {
-    return <div className="text-sm text-muted-foreground">Loading trend…</div>;
+    return (
+      <div className="w-full motion-safe:animate-pulse">
+        <div className="mb-2 h-4 w-40 rounded bg-muted/50" />
+        <div className="h-64 w-full rounded-md bg-muted/50" />
+      </div>
+    );
   }
   if (error) {
     return (
@@ -74,7 +79,6 @@ export function TrendChart({ exerciseName }: { exerciseName: string }) {
     <ChartContainer
       config={{
         maxWeight: { label: "Max Weight", color: "hsl(240 100% 67%)" },
-
       }}
       className="w-full h-64"
     >

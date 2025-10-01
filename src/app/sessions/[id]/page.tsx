@@ -221,7 +221,31 @@ export default function EditSessionPage() {
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div>Loading...</div>
+            <div className="space-y-6 motion-safe:animate-pulse">
+              <div className="h-6 w-64 rounded bg-muted/50 animate-pulse" />
+              <div className="grid grid-cols-1 gap-4">
+                <div className="h-10 w-full rounded bg-muted/50" />
+                <div className="h-10 w-full rounded bg-muted/50" />
+                <div className="h-10 w-full rounded bg-muted/50" />
+              </div>
+              <div className="rounded-lg border p-4 space-y-4">
+                <div className="h-10 w-60 rounded bg-muted/50" />
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                  <div className="h-9 w-full rounded bg-muted/50" />
+                  <div className="h-9 w-full rounded bg-muted/50" />
+                  <div className="h-9 w-10 rounded bg-muted/50" />
+                </div>
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                  <div className="h-9 w-full rounded bg-muted/50" />
+                  <div className="h-9 w-full rounded bg-muted/50" />
+                  <div className="h-9 w-10 rounded bg-muted/50" />
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <div className="h-10 w-36 rounded bg-muted/50" />
+                <div className="h-10 w-44 rounded bg-muted/50" />
+              </div>
+            </div>
           ) : (
             <Form {...form}>
               <form

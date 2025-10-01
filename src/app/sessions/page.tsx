@@ -54,7 +54,13 @@ export default function SessionsPage() {
           <CardTitle>All Sessions</CardTitle>
         </CardHeader>
         <CardContent>
-          {loading && <div>Loading...</div>}
+          {loading && (
+            <div className="flex flex-col gap-3 motion-safe:animate-pulse">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="h-10 w-full rounded bg-muted/50" />
+              ))}
+            </div>
+          )}
           {error && <div className="text-red-500">{error}</div>}
           {!loading && !error && sessions.length === 0 && (
             <div>No sessions found.</div>
@@ -64,7 +70,7 @@ export default function SessionsPage() {
               {sessions.map((s) => (
                 <Button
                   key={s._id}
-                  variant="secondary"
+                  variant="ghost"
                   className="justify-start"
                   asChild
                 >

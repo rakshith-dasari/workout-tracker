@@ -106,7 +106,11 @@ export default function WorkoutTabs() {
         {WORKOUT_TYPES.map((wt) => (
           <TabsContent key={wt.value} value={wt.value}>
             {loading ? (
-              <div className="text-sm text-muted-foreground">Loading…</div>
+              <div className="flex flex-col gap-4 motion-safe:animate-pulse">
+                <div className="h-4 w-48 rounded bg-muted/50" />
+                <div className="h-8 w-full rounded bg-muted/50" />
+                <div className="h-64 w-full rounded bg-muted/50" />
+              </div>
             ) : error ? (
               <div className="text-sm text-destructive">
                 Failed to load session: {error}
