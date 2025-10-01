@@ -5,10 +5,10 @@ import { ObjectId } from "mongodb";
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext<"/api/sessions/[id]">
 ) {
   try {
-    const { id } = params;
+    const { id } = await context.params;
     if (!id) {
       return NextResponse.json({ error: "Missing id" }, { status: 400 });
     }
@@ -47,10 +47,10 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: RouteContext<"/api/sessions/[id]">
 ) {
   try {
-    const { id } = params;
+    const { id } = await context.params;
     if (!id) {
       return NextResponse.json({ error: "Missing id" }, { status: 400 });
     }

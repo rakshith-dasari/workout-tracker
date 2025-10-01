@@ -1,9 +1,9 @@
-import { Db } from "mongodb";
+import { Db, ObjectId } from "mongodb";
 
 export type SessionSet = { weight: number; reps: number };
 export type SessionExercise = { name: string; sets: SessionSet[] };
 export type SessionDoc = {
-  _id: unknown;
+  _id: ObjectId;
   date: Date;
   bodyWeight?: number | null;
   workoutType: string;
