@@ -5,7 +5,7 @@ interface CacheEntry<T> {
 }
 
 class SimpleCache {
-  private cache = new Map<string, CacheEntry<any>>();
+  private cache = new Map<string, CacheEntry<unknown>>();
 
   set<T>(key: string, data: T, ttlSeconds: number = 300): void {
     // Default 5 minutes
@@ -25,7 +25,7 @@ class SimpleCache {
       return null;
     }
 
-    return entry.data;
+    return entry.data as T;
   }
 
   clear(): void {

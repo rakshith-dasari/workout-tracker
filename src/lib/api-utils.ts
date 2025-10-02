@@ -1,12 +1,11 @@
-import { ObjectId } from "mongodb";
-import { SessionDoc } from "./repos/sessions";
+import { SessionDoc, SessionExercise } from "./repos/sessions";
 
 export type TransformedSession = {
   _id: string;
   date: string;
   workoutType: string;
   bodyWeight: number | null;
-  workout: any[];
+  workout: SessionExercise[];
 };
 
 /**
@@ -14,17 +13,14 @@ export type TransformedSession = {
  */
 export function transformSession(doc: SessionDoc): TransformedSession {
   return {
-    _id: String((doc as any)._id),
-    date:
-      doc.date instanceof Date
-        ? doc.date.toISOString()
-        : new Date((doc as any).date).toISOString(),
+    _id: String(doc._id),
+    date: doc.date.toISOString(),
     workoutType: doc.workoutType,
     bodyWeight:
       typeof doc.bodyWeight === "number"
         ? doc.bodyWeight
         : doc.bodyWeight ?? null,
-    workout: Array.isArray(doc.workout) ? doc.workout : [],
+    workout: doc.workout,
   };
 }
 

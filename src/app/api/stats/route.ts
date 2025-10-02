@@ -2,14 +2,11 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/lib/mongo";
 import {
   calculateCurrentStreak,
-  formatDateToString,
   getCurrentWeekRange,
   getCurrentMonthRange,
   getPreviousMonthRange,
 } from "@/lib/api-utils";
 import { cache, CACHE_KEYS } from "@/lib/cache";
-
-type DatePoint = { date: string; value: number };
 
 export async function GET() {
   try {
@@ -163,10 +160,13 @@ export async function GET() {
     const volumeByDate = statsResult.volumeByDate;
 
     // Process workout dates for streak calculation
-    const workoutDates = statsResult.workoutDates.map((doc: any) => doc.date);
-    const uniqueDates = [...new Set(workoutDates)].sort((a, b) =>
-      b.localeCompare(a)
+    const workoutDates = statsResult.workoutDates.map(
+      (doc: { date: string }) => doc.date
     );
+    const uniqueDatesSet = new Set(workoutDates);
+    const uniqueDates = Array.from(uniqueDatesSet).sort((a, b) =>
+      (b as string).localeCompare(a as string)
+    ) as string[];
     const currentStreak = calculateCurrentStreak(uniqueDates);
 
     // Extract session counts
@@ -179,7 +179,8 @@ export async function GET() {
     const avgBodyWeight30d =
       last30.length > 0
         ? last30.reduce(
-            (sum, p) => sum + (typeof p.value === "number" ? p.value : 0),
+            (sum: number, p: { value: number | null }) =>
+              sum + (typeof p.value === "number" ? p.value : 0),
             0
           ) / last30.length
         : null;

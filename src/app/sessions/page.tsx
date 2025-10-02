@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { format } from "date-fns";
@@ -8,6 +8,7 @@ import { Trash2 } from "lucide-react";
 // import { WorkoutCalendar } from "@/components/WorkoutCalendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { TransformedSession } from "@/lib/api-utils";
 
 type SessionItem = {
   _id: string;
@@ -15,7 +16,7 @@ type SessionItem = {
   workoutType: string;
 };
 
-export default function SessionsPage() {
+function SessionsPageContent() {
   const [sessions, setSessions] = useState<SessionItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,13 +32,15 @@ export default function SessionsPage() {
         const res = await fetch("/api/sessions", { cache: "no-store" });
         if (!res.ok) throw new Error("Failed to load sessions");
         const data = await res.json();
-        const mapped: SessionItem[] = (data.sessions ?? []).map((s: any) => ({
-          _id: s._id,
-          date: s.date,
-          workoutType: s.workoutType,
-        }));
+        const mapped: SessionItem[] = (data.sessions ?? []).map(
+          (s: TransformedSession) => ({
+            _id: s._id,
+            date: s.date,
+            workoutType: s.workoutType,
+          })
+        );
         setSessions(mapped);
-      } catch (e) {
+      } catch {
         setError("Failed to load sessions");
       } finally {
         setLoading(false);
@@ -159,5 +162,13 @@ export default function SessionsPage() {
         </CardContent>
       </Card>
     </main>
+  );
+}
+
+export default function SessionsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SessionsPageContent />
+    </Suspense>
   );
 }

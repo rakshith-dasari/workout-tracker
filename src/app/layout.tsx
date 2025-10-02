@@ -32,13 +32,16 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <AppSidebar />
-          <div className="min-h-screen">
-            <div className="flex">
+          <div className="min-h-screen flex flex-col">
+            <div className="flex flex-1">
               <SidebarSpacer />
-              <div className="flex-1">{children}</div>
+              <div className="flex-1 pt-16 md:pt-0">{children}</div>
             </div>
           </div>
+
+          {/* Sidebar - handles its own responsive behavior */}
+          <AppSidebar />
+
           <Toaster richColors closeButton position="top-right" />
         </ThemeProvider>
       </body>

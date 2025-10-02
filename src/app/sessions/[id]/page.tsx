@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { useForm, ControllerRenderProps } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
@@ -13,7 +13,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -51,12 +50,14 @@ const formSchema = z.object({
   workoutType: z.string().min(1, "Select a type"),
 });
 
+type FormData = z.infer<typeof formSchema>;
+
 export default function EditSessionPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const sessionId = params?.id;
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       date: new Date(),
@@ -96,16 +97,23 @@ export default function EditSessionPage() {
           workoutType: s.workoutType,
         });
         setExercises(
-          (s.workout ?? []).map((ex: any) => ({
-            id: crypto.randomUUID(),
-            name: ex.name,
-            sets: (ex.sets ?? []).map((st: any) => ({
-              weight: st.weight ?? null,
-              reps: st.reps ?? null,
-            })),
-          }))
+          (s.workout ?? []).map(
+            (ex: {
+              name: string;
+              sets: { weight: number; reps: number }[];
+            }) => ({
+              id: crypto.randomUUID(),
+              name: ex.name,
+              sets: (ex.sets ?? []).map(
+                (st: { weight: number; reps: number }) => ({
+                  weight: st.weight ?? null,
+                  reps: st.reps ?? null,
+                })
+              ),
+            })
+          )
         );
-      } catch (e) {
+      } catch {
         toast.error("Failed to load session");
       } finally {
         setLoading(false);
@@ -208,7 +216,7 @@ export default function EditSessionPage() {
       if (!res.ok) throw new Error("Failed to update");
       toast.success("Session updated");
       router.push("/sessions");
-    } catch (err) {
+    } catch {
       toast.error("Failed to update session");
     }
   };
@@ -256,7 +264,11 @@ export default function EditSessionPage() {
                   <FormField
                     control={form.control}
                     name="date"
-                    render={({ field }: { field: any }) => (
+                    render={({
+                      field,
+                    }: {
+                      field: ControllerRenderProps<FormData, "date">;
+                    }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>Date</FormLabel>
                         <Popover>
@@ -296,7 +308,11 @@ export default function EditSessionPage() {
                   <FormField
                     control={form.control}
                     name="bodyWeight"
-                    render={({ field }: { field: any }) => (
+                    render={({
+                      field,
+                    }: {
+                      field: ControllerRenderProps<FormData, "bodyWeight">;
+                    }) => (
                       <FormItem>
                         <FormLabel>Body Weight (kg)</FormLabel>
                         <FormControl>
@@ -315,7 +331,11 @@ export default function EditSessionPage() {
                   <FormField
                     control={form.control}
                     name="workoutType"
-                    render={({ field }: { field: any }) => (
+                    render={({
+                      field,
+                    }: {
+                      field: ControllerRenderProps<FormData, "workoutType">;
+                    }) => (
                       <FormItem>
                         <FormLabel>Workout Type</FormLabel>
                         <Select

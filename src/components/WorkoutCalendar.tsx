@@ -9,9 +9,7 @@ import { getDefaultClassNames } from "react-day-picker";
 import { useRouter } from "next/navigation";
 import { CalendarDay } from "react-day-picker";
 
-interface WorkoutCalendarProps {}
-
-export function WorkoutCalendar({}: WorkoutCalendarProps) {
+export function WorkoutCalendar() {
   const [loggedDates, setLoggedDates] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
 
@@ -38,8 +36,8 @@ export function WorkoutCalendar({}: WorkoutCalendarProps) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-80">
-        <div className="text-muted-foreground">Loading calendar...</div>
+      <div className="rounded-md border shadow-sm h-80 motion-safe:animate-pulse">
+        <div className="w-full h-full rounded-md bg-muted/50 animate-pulse" />
       </div>
     );
   }

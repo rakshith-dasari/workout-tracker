@@ -2,17 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/mongo";
 import { SessionDoc } from "@/lib/repos/sessions";
 import { transformSession } from "@/lib/api-utils";
-import { cache, CACHE_KEYS } from "@/lib/cache";
+import { cache } from "@/lib/cache";
 
 export async function GET() {
   try {
     const db = await getDb();
-    const docs = await db
+    const docs = (await db
       .collection<SessionDoc>("sessions")
       .find({})
       .project({ date: 1, workoutType: 1, bodyWeight: 1, workout: 1 })
       .sort({ date: -1 })
-      .toArray();
+      .toArray()) as SessionDoc[];
 
     const sessions = docs.map(transformSession);
 

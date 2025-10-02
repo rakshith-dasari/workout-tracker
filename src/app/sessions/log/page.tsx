@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { useForm, ControllerRenderProps } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
@@ -12,7 +12,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -41,11 +40,6 @@ type SessionExercise = { id: string; name: string; sets: SessionSet[] };
 
 const WORKOUT_TYPES = ["Push", "Pull", "Legs", "Full Body", "Upper", "Lower"];
 
-const setSchema = z.object({
-  weight: z.coerce.number().min(0).max(2000),
-  reps: z.coerce.number().int().min(1).max(100),
-});
-
 const formSchema = z.object({
   date: z.date({ required_error: "Date is required" }),
   bodyWeight: z
@@ -55,8 +49,10 @@ const formSchema = z.object({
   workoutType: z.string().min(1, "Select a type"),
 });
 
+type FormData = z.infer<typeof formSchema>;
+
 export default function LogSessionPage() {
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       date: new Date(),
@@ -168,7 +164,7 @@ export default function LogSessionPage() {
       // Reset form
       form.reset({ date: new Date(), bodyWeight: undefined, workoutType: "" });
       setExercises([]);
-    } catch (err) {
+    } catch {
       toast.error("Failed to log session");
     }
   };
@@ -186,7 +182,11 @@ export default function LogSessionPage() {
                 <FormField
                   control={form.control}
                   name="date"
-                  render={({ field }: { field: any }) => (
+                  render={({
+                    field,
+                  }: {
+                    field: ControllerRenderProps<FormData, "date">;
+                  }) => (
                     <FormItem className="flex flex-col">
                       <FormLabel>Date</FormLabel>
                       <Popover>
@@ -226,7 +226,11 @@ export default function LogSessionPage() {
                 <FormField
                   control={form.control}
                   name="bodyWeight"
-                  render={({ field }: { field: any }) => (
+                  render={({
+                    field,
+                  }: {
+                    field: ControllerRenderProps<FormData, "bodyWeight">;
+                  }) => (
                     <FormItem>
                       <FormLabel>Body Weight (kg)</FormLabel>
                       <FormControl>
@@ -245,7 +249,11 @@ export default function LogSessionPage() {
                 <FormField
                   control={form.control}
                   name="workoutType"
-                  render={({ field }: { field: any }) => (
+                  render={({
+                    field,
+                  }: {
+                    field: ControllerRenderProps<FormData, "workoutType">;
+                  }) => (
                     <FormItem>
                       <FormLabel>Workout Type</FormLabel>
                       <Select
