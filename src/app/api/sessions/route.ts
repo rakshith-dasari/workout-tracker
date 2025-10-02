@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/mongo";
 import { SessionDoc } from "@/lib/repos/sessions";
+import { transformSession } from "@/lib/api-utils";
+import { cache, CACHE_KEYS } from "@/lib/cache";
 
 export async function GET() {
   try {
@@ -12,17 +14,7 @@ export async function GET() {
       .sort({ date: -1 })
       .toArray();
 
-    const sessions = docs.map((d) => ({
-      _id: String((d as any)._id),
-      date:
-        d.date instanceof Date
-          ? d.date.toISOString()
-          : new Date((d as any).date).toISOString(),
-      workoutType: d.workoutType,
-      bodyWeight:
-        typeof d.bodyWeight === "number" ? d.bodyWeight : d.bodyWeight ?? null,
-      workout: Array.isArray(d.workout) ? d.workout : [],
-    }));
+    const sessions = docs.map(transformSession);
 
     return NextResponse.json({ sessions }, { status: 200 });
   } catch (error) {
@@ -54,6 +46,11 @@ export async function POST(req: NextRequest) {
     await db
       .collection<SessionDoc>("sessions")
       .insertOne(session as SessionDoc);
+
+    // Invalidate cache since stats have changed
+    cache.invalidate("stats");
+    cache.invalidate("exercise_trend");
+
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (error) {
     console.error("/api/sessions POST error", error);

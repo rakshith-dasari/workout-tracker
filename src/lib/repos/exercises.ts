@@ -19,9 +19,10 @@ export async function getExerciseTrend(
       $group: {
         _id: { date: { $dateToString: { format: "%Y-%m-%d", date: "$date" } } },
         maxWeight: { $max: "$workout.sets.weight" },
+        maxReps: { $max: "$workout.sets.reps" },
       },
     },
-    { $project: { _id: 0, date: "$_id.date", maxWeight: 1 } },
+    { $project: { _id: 0, date: "$_id.date", maxWeight: 1, maxReps: 1 } },
     { $sort: { date: 1 } },
   ]);
 

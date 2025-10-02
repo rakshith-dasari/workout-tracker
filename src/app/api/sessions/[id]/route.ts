@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/mongo";
 import { SessionDoc } from "@/lib/repos/sessions";
 import { ObjectId } from "mongodb";
+import { transformSession } from "@/lib/api-utils";
+import { cache } from "@/lib/cache";
 
 export async function GET(
   _req: NextRequest,
@@ -21,19 +23,7 @@ export async function GET(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const session = {
-      _id: String((doc as any)._id),
-      date:
-        doc.date instanceof Date
-          ? doc.date.toISOString()
-          : new Date((doc as any).date).toISOString(),
-      workoutType: doc.workoutType,
-      bodyWeight:
-        typeof doc.bodyWeight === "number"
-          ? doc.bodyWeight
-          : doc.bodyWeight ?? null,
-      workout: Array.isArray(doc.workout) ? doc.workout : [],
-    };
+    const session = transformSession(doc);
 
     return NextResponse.json({ session }, { status: 200 });
   } catch (error) {
@@ -81,11 +71,48 @@ export async function PUT(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
+    // Invalidate cache since stats have changed
+    cache.invalidate("stats");
+    cache.invalidate("exercise_trend");
+
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (error) {
     console.error("/api/sessions/[id] PUT error", error);
     return NextResponse.json(
       { error: "Failed to update session" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  _req: NextRequest,
+  context: RouteContext<"/api/sessions/[id]">
+) {
+  try {
+    const { id } = await context.params;
+    if (!id) {
+      return NextResponse.json({ error: "Missing id" }, { status: 400 });
+    }
+
+    const db = await getDb();
+    const result = await db
+      .collection<SessionDoc>("sessions")
+      .deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    // Invalidate cache since stats have changed
+    cache.invalidate("stats");
+    cache.invalidate("exercise_trend");
+
+    return NextResponse.json({ ok: true }, { status: 200 });
+  } catch (error) {
+    console.error("/api/sessions/[id] DELETE error", error);
+    return NextResponse.json(
+      { error: "Failed to delete session" },
       { status: 500 }
     );
   }
