@@ -38,6 +38,12 @@ import { toast } from "sonner";
 
 type SessionSet = { weight: number | null; reps: number | null };
 type SessionExercise = { id: string; name: string; sets: SessionSet[] };
+type ExerciseStats = {
+  maxWeight: number | null;
+  maxReps: number | null;
+  lastWeight: number | null;
+  lastReps: number | null;
+};
 
 const WORKOUT_TYPES = ["Push", "Pull", "Legs", "Full Body", "Upper", "Lower"];
 
@@ -68,6 +74,9 @@ export default function EditSessionPage() {
 
   const [exercises, setExercises] = useState<SessionExercise[]>([]);
   const [allExerciseNames, setAllExerciseNames] = useState<string[]>([]);
+  const [exerciseStats, setExerciseStats] = useState<
+    Record<string, ExerciseStats>
+  >({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -96,23 +105,48 @@ export default function EditSessionPage() {
               : undefined,
           workoutType: s.workoutType,
         });
-        setExercises(
-          (s.workout ?? []).map(
-            (ex: {
-              name: string;
-              sets: { weight: number; reps: number }[];
-            }) => ({
-              id: crypto.randomUUID(),
-              name: ex.name,
-              sets: (ex.sets ?? []).map(
-                (st: { weight: number; reps: number }) => ({
-                  weight: st.weight ?? null,
-                  reps: st.reps ?? null,
-                })
-              ),
-            })
-          )
+        const loadedExercises = (s.workout ?? []).map(
+          (ex: { name: string; sets: { weight: number; reps: number }[] }) => ({
+            id: crypto.randomUUID(),
+            name: ex.name,
+            sets: (ex.sets ?? []).map(
+              (st: { weight: number; reps: number }) => ({
+                weight: st.weight ?? null,
+                reps: st.reps ?? null,
+              })
+            ),
+          })
         );
+        setExercises(loadedExercises);
+
+        // Load exercise stats for loaded exercises
+        const statsPromises = loadedExercises
+          .filter((ex: SessionExercise) => ex.name)
+          .map(async (ex: SessionExercise) => {
+            if (!exerciseStats[ex.name]) {
+              try {
+                const response = await fetch(
+                  `/api/exercises?name=${encodeURIComponent(ex.name)}`
+                );
+                if (response.ok) {
+                  const data = await response.json();
+                  return { name: ex.name, stats: data.stats };
+                }
+              } catch (error) {
+                console.error("Failed to fetch exercise stats:", error);
+              }
+            }
+            return null;
+          });
+
+        const statsResults = await Promise.all(statsPromises);
+        const newStats: Record<string, ExerciseStats> = {};
+        statsResults.forEach((result) => {
+          if (result) {
+            newStats[result.name] = result.stats;
+          }
+        });
+        setExerciseStats((prev) => ({ ...prev, ...newStats }));
       } catch {
         toast.error("Failed to load session");
       } finally {
@@ -170,8 +204,23 @@ export default function EditSessionPage() {
     );
   };
 
-  const updateExerciseName = (id: string, name: string) => {
+  const updateExerciseName = async (id: string, name: string) => {
     setExercises((prev) => prev.map((e) => (e.id === id ? { ...e, name } : e)));
+
+    // Fetch exercise stats if not already cached
+    if (name && !exerciseStats[name]) {
+      try {
+        const response = await fetch(
+          `/api/exercises?name=${encodeURIComponent(name)}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setExerciseStats((prev) => ({ ...prev, [name]: data.stats }));
+        }
+      } catch (error) {
+        console.error("Failed to fetch exercise stats:", error);
+      }
+    }
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
@@ -407,6 +456,26 @@ export default function EditSessionPage() {
                           </Button>
                         </div>
                       </div>
+
+                      {ex.name && exerciseStats[ex.name] && (
+                        <div className="mt-2 text-sm text-muted-foreground">
+                          <span className="font-medium">Max:</span>{" "}
+                          {exerciseStats[ex.name].maxWeight &&
+                          exerciseStats[ex.name].maxReps
+                            ? `${exerciseStats[ex.name].maxWeight}kg × ${
+                                exerciseStats[ex.name].maxReps
+                              }`
+                            : "N/A"}
+                          {" • "}
+                          <span className="font-medium">Last:</span>{" "}
+                          {exerciseStats[ex.name].lastWeight &&
+                          exerciseStats[ex.name].lastReps
+                            ? `${exerciseStats[ex.name].lastWeight}kg × ${
+                                exerciseStats[ex.name].lastReps
+                              }`
+                            : "N/A"}
+                        </div>
+                      )}
 
                       {ex.sets.length > 0 && (
                         <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">

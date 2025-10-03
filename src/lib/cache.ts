@@ -50,4 +50,5 @@ export const CACHE_KEYS = {
   STATS: "stats",
   EXERCISE_NAMES: "exercise_names",
   EXERCISE_TREND: (name: string) => `exercise_trend_${name}`,
+  EXERCISE_STATS: (name: string) => `exercise_stats_${name}`,
 } as const;
