@@ -1,4 +1,5 @@
 import { SessionDoc, SessionExercise } from "./repos/sessions";
+import { formatLocalDate } from "./utils";
 
 export type TransformedSession = {
   _id: string;
@@ -14,7 +15,7 @@ export type TransformedSession = {
 export function transformSession(doc: SessionDoc): TransformedSession {
   return {
     _id: String(doc._id),
-    date: doc.date.toISOString(),
+    date: formatLocalDate(doc.date),
     workoutType: doc.workoutType,
     bodyWeight:
       typeof doc.bodyWeight === "number"
@@ -28,7 +29,7 @@ export function transformSession(doc: SessionDoc): TransformedSession {
  * Formats a date to YYYY-MM-DD string
  */
 export function formatDateToString(date: Date): string {
-  return date.toISOString().split("T")[0];
+  return formatLocalDate(date);
 }
 
 /**
@@ -36,12 +37,12 @@ export function formatDateToString(date: Date): string {
  */
 export function calculateCurrentStreak(uniqueDates: string[]): number {
   let currentStreak = 0;
-  const today = new Date().toISOString().split("T")[0];
+  const today = formatLocalDate(new Date());
 
   // Check if worked out today or yesterday (to handle time zones)
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = yesterday.toISOString().split("T")[0];
+  const yesterdayStr = formatLocalDate(yesterday);
 
   const hasWorkedOutToday = uniqueDates.includes(today);
   const hasWorkedOutYesterday = uniqueDates.includes(yesterdayStr);
@@ -53,7 +54,7 @@ export function calculateCurrentStreak(uniqueDates: string[]): number {
     while (true) {
       const prevDay = new Date(consecutiveDate);
       prevDay.setDate(prevDay.getDate() - 1);
-      const prevDayStr = prevDay.toISOString().split("T")[0];
+      const prevDayStr = formatLocalDate(prevDay);
 
       if (uniqueDates.includes(prevDayStr)) {
         currentStreak++;

@@ -50,10 +50,7 @@ function SessionsPageContent() {
   }, []);
 
   const filteredSessions = dateFilter
-    ? sessions.filter((s) => {
-        const sessionDate = new Date(s.date).toISOString().split("T")[0];
-        return sessionDate === dateFilter;
-      })
+    ? sessions.filter((s) => s.date === dateFilter)
     : sessions;
 
   const handleClearFilter = () => {

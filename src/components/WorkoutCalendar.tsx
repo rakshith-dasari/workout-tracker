@@ -4,7 +4,7 @@ import * as React from "react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar, CalendarDayButton } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
+import { cn, formatLocalDate } from "@/lib/utils";
 import { getDefaultClassNames } from "react-day-picker";
 import { useRouter } from "next/navigation";
 import { CalendarDay } from "react-day-picker";
@@ -29,7 +29,7 @@ export function WorkoutCalendar() {
 
   const hasWorkout = React.useCallback(
     (date: Date): boolean => {
-      return loggedDates.has(date.toISOString().split("T")[0]);
+      return loggedDates.has(formatLocalDate(date));
     },
     [loggedDates]
   );
@@ -89,7 +89,7 @@ export function WorkoutCalendar() {
       modifiers={{ hasWorkout }}
       onDayClick={(date, modifiers) => {
         if (modifiers.hasWorkout) {
-          router.push(`/sessions?date=${date.toISOString().split("T")[0]}`);
+          router.push(`/sessions?date=${formatLocalDate(date)}`);
         }
       }}
       components={{
