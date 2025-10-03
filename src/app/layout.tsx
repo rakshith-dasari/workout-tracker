@@ -5,6 +5,7 @@ import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
 import AppSidebar from "@/components/AppSidebar";
 import { SidebarSpacer } from "@/components/ui/sidebar";
+import { AuthProvider } from "@/components/AuthProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,19 +32,21 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-          <div className="min-h-screen flex flex-col">
-            <div className="flex flex-1">
-              <SidebarSpacer />
-              <div className="flex-1 pt-16 md:pt-0">{children}</div>
+        <AuthProvider>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+            <div className="min-h-screen flex flex-col">
+              <div className="flex flex-1">
+                <SidebarSpacer />
+                <div className="flex-1 pt-16 md:pt-0">{children}</div>
+              </div>
             </div>
-          </div>
 
-          {/* Sidebar - handles its own responsive behavior */}
-          <AppSidebar />
+            {/* Sidebar - handles its own responsive behavior */}
+            <AppSidebar />
 
-          <Toaster richColors closeButton position="top-right" />
-        </ThemeProvider>
+            <Toaster richColors closeButton position="top-right" />
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

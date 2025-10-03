@@ -71,6 +71,11 @@ function SessionsPageContent() {
         method: "DELETE",
       });
 
+      if (res.status === 401) {
+        setError("Authentication required. Please log in to delete sessions.");
+        return;
+      }
+
       if (!res.ok) {
         throw new Error("Failed to delete session");
       }

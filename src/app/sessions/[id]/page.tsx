@@ -213,6 +213,12 @@ export default function EditSessionPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+      if (res.status === 401) {
+        toast.error(
+          "Authentication required. Please log in to update sessions."
+        );
+        return;
+      }
       if (!res.ok) throw new Error("Failed to update");
       toast.success("Session updated");
       router.push("/sessions");

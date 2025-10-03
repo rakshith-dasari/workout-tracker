@@ -159,6 +159,10 @@ export default function LogSessionPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
+      if (res.status === 401) {
+        toast.error("Authentication required. Please log in to log sessions.");
+        return;
+      }
       if (!res.ok) throw new Error("Failed to save");
       toast.success("Session logged");
       // Reset form

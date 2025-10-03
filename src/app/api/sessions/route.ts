@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
 import { getDb } from "@/lib/mongo";
 import { SessionDoc } from "@/lib/repos/sessions";
 import { transformSession } from "@/lib/api-utils";
 import { cache } from "@/lib/cache";
+import { authOptions } from "@/lib/auth";
 
 export async function GET() {
   try {
@@ -28,6 +30,15 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    const session = await getServerSession(authOptions);
+
+    if (!session) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
+    }
+
     const body = await req.json();
     const { date, bodyWeight, workoutType, workout } = body ?? {};
 
@@ -35,7 +46,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
     }
 
-    const session: Omit<SessionDoc, "_id"> = {
+    const sessionDoc: Omit<SessionDoc, "_id"> = {
       date: new Date(date),
       bodyWeight: typeof bodyWeight === "number" ? bodyWeight : null,
       workoutType,
@@ -45,7 +56,7 @@ export async function POST(req: NextRequest) {
     const db = await getDb();
     await db
       .collection<SessionDoc>("sessions")
-      .insertOne(session as SessionDoc);
+      .insertOne(sessionDoc as SessionDoc);
 
     // Invalidate cache since stats have changed
     cache.invalidate("stats");

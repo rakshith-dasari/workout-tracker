@@ -2,6 +2,8 @@
 
 A modern, full-featured workout tracking application built with Next.js, TypeScript, and MongoDB. Track your workouts, monitor progress with detailed statistics and visualizations, and maintain workout streaks.
 
+**Public Access**: Anyone can view workout data and statistics, and access all UI components. Admin authentication is required only when actually performing write operations (logging, editing, or deleting sessions).
+
 ## Features
 
 ### **Dashboard & Statistics**
@@ -32,6 +34,14 @@ A modern, full-featured workout tracking application built with Next.js, TypeScr
 - **Date Filtering**: Filter sessions by specific dates
 - **Session History**: Browse all past workouts with filtering options
 
+### **Authentication & Access Control**
+
+- **Full Public Access**: All workout data, statistics, trends, and UI components are publicly accessible
+- **API-Level Protection**: Authentication is only required when performing write operations (POST/PUT/DELETE)
+- **Graceful Degradation**: Users see all functionality but get clear error messages when authentication is needed
+- **Simple Login**: Username/password authentication for admin access
+- **Session-Based**: Authentication persists across browser sessions
+
 ### **Technical Features**
 
 - **Real-time Caching**: Smart caching system for optimal performance
@@ -39,6 +49,7 @@ A modern, full-featured workout tracking application built with Next.js, TypeScr
 - **TypeScript**: Full type safety throughout the application
 - **Modern UI**: Built with shadcn/ui components and Tailwind CSS
 - **Dark/Light Theme**: Theme support with next-themes
+- **NextAuth.js**: Secure authentication system
 
 ## Getting Started
 
@@ -72,9 +83,18 @@ A modern, full-featured workout tracking application built with Next.js, TypeScr
    Create a `.env.local` file in the root directory:
 
    ```env
+   # Database
    MONGODB_URI=mongodb://localhost:27017/workout-tracker
    # or for MongoDB Atlas:
    # MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/workout-tracker
+
+   # Authentication (required for admin features)
+   # Generate a secure random string for NEXTAUTH_SECRET (you can use: openssl rand -base64 32)
+   NEXTAUTH_SECRET=your-secret-key-here
+
+   # Admin credentials for logging/editing sessions
+   AUTH_USERNAME=your-username
+   AUTH_PASSWORD=your-secure-password
    ```
 
 4. **Start MongoDB**
@@ -192,4 +212,4 @@ workout-tracker/
 
 ## License
 
-This project is private and not licensed for public use.
+This project is open source and available under the MIT License. However, the workout data contained within may be personal and should be treated accordingly.
